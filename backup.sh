@@ -12,17 +12,17 @@
 # IncrementalBackup(source,destination,filename,snapshot,parent)
 # PerformBackup(source,destination,backupfile,snapshotfile)
 #################################################################
-MsgType "Welcome to incremental backups tool."
+MsgType "Bem-vindo à ferramenta de backups incrementais."
 
 read -r -d '' welcome_print << EOM
 Usage:
- *backup-full: Perform full backup of the folder.
- *backup-increment: Perform incremental backup.
- *restore: Restore folder to state from given time [date]
-	-example:  restore '2020/01/11 09:35:00'
- *show: show files in backup files  [date]
-	-example:  show '2020/01/11 09:35:00'
- *list: list all backup files
+ *backup-full: Faça backup completo da pasta.
+ *backup-increment: Executa backup incremental.
+ *restore: Restaura a pasta para o estado a partir de um determinado momento [date]
+	-exemplo:  restore '2020/01/11 09:35:00'
+ *show: Mostra os arquivos nos arquivos de backup [date]
+	-exemplo:  show '2020/01/11 09:35:00'
+ *list: Lista todos os arquivos de backup 
 
 EOM
 echo  "$welcome_print"

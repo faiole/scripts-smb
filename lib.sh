@@ -7,7 +7,7 @@ function MsgType {
 	print_now=`date +"%Y-%m-%d %T"`
 	if [ "$error" = 1 ]; then
 		echo -e "\e[1m${print_now}: \e[31m $msg \e[0m"
-		echo -e "\e[1m${print_now}: \e[31m Script stopped. \e[0m"
+		echo -e "\e[1m${print_now}: \e[31m Script parado. \e[0m"
 		exit
 	else
 		echo -e "\e[1m${print_now}: \e[0;92m $msg \e[0m"
@@ -17,9 +17,9 @@ function MsgType {
 function LoadConfiguration {
 	local config="$1"
 	if [ -f "$config" ]; then
-		MsgType "Configuration file: $config"
+		MsgType "Arquivo de configuração: $config"
 	else
-		MsgType "Configuration file not found!" 1
+		MsgType "Arquivo de configuração não encontrado!" 1
 	fi
 	source "$config"
 }
@@ -27,48 +27,48 @@ function LoadConfiguration {
 function ValidateBackupSource {
 	local source="$1"
 	if [ -z "$source" ]; then
-		MsgType "No backup source defined!" 1
+		MsgType "Nenhuma fonte de backup definida!" 1
 	fi
 	if [ ! -d "$source" ]; then
-		MsgType "Backup source not found!" 1
+		MsgType "Fonte de backup não encontrada!" 1
 	fi
-	MsgType "Backup source	 	: $source "
+	MsgType "Fonte do Backup : $source "
 }
 
 function ValidateBackupDestination {
 	local destination="$1"
 	if [ -z "$destination" ]; then
-		MsgType "No backup destination defined!" 1
+		MsgType "Nenhum destino de backup definido!" 1
 	fi
 	if [ ! -d "$destination" ]; then
-		MsgType "Backup destination not found. Creating ..."
+		MsgType "Destino de backup não encontrado. Criando..."
 		mkdir -p "$destination"
 		if [ ! -d "$destination" ]; then
-			MsgType "Could not create the backup folder" 1
+			MsgType "Não foi possível criar a pasta de backup." 1
 		fi
 	fi
-	MsgType "Backup destination	: $destination "
+	MsgType "Backup destino	: $destination "
 }
 
 function ValidateBackupParent {
 	local parent="$1"
 	local destination="$2"
 	if [ -z "$parent" ]; then
-		MsgType "No backup parent defined!" 1
+		MsgType "Nenhum backup master definido!" 1
 	fi
 	if [ ! -d "$parent" ]; then
 		parentDirs=($(find "$destination" -type d -name "$parent"))
 		if [ "${#parentDirs[@]}" -gt 1 ]; then
-			MsgType "Backup parent is ambivalent!" 1
+			MsgType "Backup master é ambíguo!" 1
 			for dir in "${parentDirs[@]}"; do
 				MsgType "$dir" 1
 			done
-			MsgType "Cannot continue." 1
+			MsgType "Não é possível continuar." 1
 		elif [ "${#parentDirs[@]}" -eq 0 ]; then
-			MsgType "Backup parent not found!" 1
+			MsgType "Backup master não encontrado!" 1
 		fi	
 	fi
-	MsgType "Backup parent		: $parent "
+	MsgType "Backup master		: $parent "
 }
 
 function SetConfigField(){
@@ -79,7 +79,7 @@ function SetConfigField(){
 }
 
 function FullBackup {
-	MsgType "Full Backup requested."
+	MsgType "Backup completo solicitado."
 	local source="$1"
 	local destination="$2"
 	local filename="$3"
@@ -88,14 +88,14 @@ function FullBackup {
 	local timestamp=`date +%Y%m%d-%H%M%S`
 	local directory="$destination/$timestamp-full"
 	local archive="$filename.tar.gz"
-	MsgType "Performing full backup..."										
+	MsgType "Executando backup completo..."										
 	PerformBackup "$source" "$directory" "$archive" "$snapshot"	
-	MsgType "Saving new parent to config..."
+	MsgType "Salvando novo master no arquivo de configuração..."
 	SetConfigField $config BACKUP_PARENT "$timestamp-full"
 }
 
 function IncrementalBackup {
-	MsgType "Incremental Backup requested."
+	MsgType "Backup incremental solicitado."
 	local source="$1"
 	local destination="$2"
 	local filename="$3"
@@ -109,13 +109,13 @@ function IncrementalBackup {
 	local lastfile=(`find $destination/$parent/ -name "level$lastlevel.snapshot"`);
 	local parentSnapshot="${lastfile[0]}"
 	if [ -z "$parentSnapshot" ]; then
-		MsgType "No snapshot found, please do full backup first." 1
+		MsgType "Nenhum snapshot encontrado, faça backup completo primeiro." 1
 	fi
-	MsgType "Backup from		: $parentSnapshot"
+	MsgType "Backup de		: $parentSnapshot"
 	MsgType "Level increment		: $lastlevel -> $level"
 	local snapshot="level$level.snapshot"				
-	MsgType "Snapshot file		: $snapshot"
-	MsgType "Creating incremental backup ..."
+	MsgType "Arquivo de Snapshot		: $snapshot"
+	MsgType "Criando backup incremental ..."
 	mkdir -p "$directory"
 	cp -a "$parentSnapshot" "$directory/$snapshot"
 	PerformBackup "$source" "$directory" "$archive" "$snapshot"
@@ -133,12 +133,12 @@ function PerformBackup {
 	res=$?
 	if [ ! $res -eq 0 ];
 	then
-		MsgType "Tar failed! ($res)" 1
+		MsgType "Compactação falhou! ($res)" 1
 	else
 		backupDuration=$(($SECONDS - $backupStart))
 		backupMin=$(($backupDuration / 60))
 		backupSec=$(($backupDuration % 60))
-		MsgType "Backup completed. Time: ${backupMin}min ${backupSec}sec."
+		MsgType "Backup completo. Tempo: ${backupMin}min ${backupSec}sec."
 	fi
 	return $res
 }
@@ -181,9 +181,9 @@ function readBackup {
 	files=($1/*.snapshot);
 	local snapshot="${files[0]}"
 	if [ ! -f "$archive" ]; then
-		MsgType "No archive file found!" 1
+		MsgType "Nenhum arquivo foi encontrado!" 1
 	elif [ ! -f "$snapshot" ]; then
-		MsgType "No snapshot file found!" 1
+		MsgType "Nenhum snapshot foi encontrado!" 1
  	fi
 
 	local level=${snapshot##*level}
@@ -194,13 +194,13 @@ function readBackup {
 
 	if [ ! -f "$archive" ]; then
 		success=false
-		error="No archive file found!"
+		error="Nenhum arquivo foi encontrado!"
 	elif [ ! -f "$snapshot" ]; then
 		success=false
-		error="No snapshot file found!"
+		error="Nenhum snapshot foi encontrado!"
 	elif [ -z "$level" ]; then
 	 	success=false
-	 	error="Could not determine backup level!"
+	 	error="Não foi possível determinar o nível de backup!"
  	fi
 	
 	if [ "$success" = true ]; then
@@ -213,7 +213,7 @@ function readBackup {
 
 
 function GetCloseSnap {
-	MsgType "Browsing backup files..."
+	MsgType "Procurando arquivos de backup..."
 	local destination="$2"
 	local date_c=$(date -d "$1" +%s)
 	local actiontype="$3"
@@ -237,19 +237,19 @@ function GetCloseSnap {
 			fi
 		done
 	done
-	MsgType "Closest date is: $(date -r "$old_value" +%d.%m.%Y-%H:%M:%S)"
-	MsgType "Backup found: $old_value"
+	MsgType "A data mais próxima é: $(date -r "$old_value" +%d.%m.%Y-%H:%M:%S)"
+	MsgType "Backup encontrado: $old_value"
 	if (( $actiontype == 1)) ; then
-		MsgType "Restoring folder..."
+		MsgType "Restaurando pasta..."
 		local lastfile=(`find $old_value/ -name "level*.snapshot"`);
 		local parentSnapshot="${lastfile[0]}"
 		echo $parentSnapshot
 		restore "$old_value" "$filename"
-		MsgType "Folder restored."
+		MsgType "Pasta restaurada."
 	else
-		MsgType "Providing metadata..."
+		MsgType "Fornecendo metadados..."
 		tar tzf "$old_value/archive.tar.gz"
-		MsgType "Metadata provided."
+		MsgType "Metadados fornecidos."
 	fi
 }
 
@@ -257,7 +257,7 @@ function GetCloseSnap {
 function restore {
 	local backuppath="$1"
 	local filename="$2"
-	MsgType "Restoration requested." 
+	MsgType "Restauração solicitada." 
 	readBackup "$backuppath" "$filename"
 	if [ "${backupInfo[0]}" = false ]; then
 		MsgType "${backupInfo[1]}" 1
@@ -265,10 +265,10 @@ function restore {
 	local archive="${backupInfo[1]}"
 	local snapshot="${backupInfo[2]}"
 	local level="${backupInfo[3]}"
-	echo "Archive file            : `basename "$archive"`"
-	echo "Snapshot file           : `basename "$snapshot"`"
+	echo "Arquivo de backup       : `basename "$archive"`"
+	echo "Snapshot                : `basename "$snapshot"`"
 	echo "Level                   : $level"
-	MsgType "Building incremental backup chain ..."
+	MsgType "Construindo cadeia de backup incremental..."
 	local backupChain=($archive)
 	local currentDirectory=`dirname "$archive"`
 	local currentLevel="$level"
@@ -279,7 +279,7 @@ function restore {
 		local findsnapshot=(`find $root_folder/ -name "*level$((currentLevel-1)).snapshot"`);
 		local snapshotfound="${findsnapshot[0]}"
 		local validpath="${snapshotfound%/*}"
-		MsgType "Restoring from: $validpath"
+		MsgType "Restaurando de: $validpath"
 		readBackup "$validpath" "$filename"
 		if [ "${backupInfo[0]}" = false ]; then
 			MsgType "${backupInfo[1]}" 1
@@ -288,7 +288,7 @@ function restore {
 		((currentLevel--))
 	done
 	printf '%s\n' "${backupChain[@]}"
-	echo "Restoring backup ... "
+	echo "Restaurando backup... "
 	local chainLastIndex=$((${#backupChain[@]}-1))
 	for ((chainIndex=$chainLastIndex; chainIndex >= 0; chainIndex--)); do
 		local backupArchive="${backupChain[$chainIndex]}"
@@ -302,10 +302,10 @@ function restore {
 		tar $tarOps "$backupArchive" -C "$BACKUP_SOURCE"		
 		res=$?
 		if [[ "$res" -eq 0 ]]; then
-			 MsgType "Success"
+			 MsgType "Concluído"
 		else	
 			echo "error $res"
-			MsgType "Could not restore backup!" 1
+			MsgType "Não foi possível restaurar o backup!" 1
 		fi			
 	done
 }
