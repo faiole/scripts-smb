@@ -1,3 +1,4 @@
 #!/bin/sh
-echo "Limpeza do Log de auditoria do SAMBA..."
-
+echo "Limpeza da lixeira do SAMBA..."
+rm -frv /dados/LixeiraSamba/*
+echo "Concluído."
