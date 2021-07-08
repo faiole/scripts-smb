@@ -59,5 +59,9 @@ case "$ACTION" in
 		[ -z "$ACTION" ] && MsgType "No action supplied!" 1
 		MsgType "Unknown action! ($ACTION)" 1
 esac
-/usr/bin/rclone copy ${BACKUP_DESTINATION} backup-fileserver:/Backup --update --verbose --transfers 30 --checkers 8 --contimeout 60s --timeout 300s --retries 3 --low-level-retries 10 --stats 1s		
+
+MsgType "Enviando os arquivos diários para a nuvem..." 1
+/usr/bin/rclone copy ${BACKUP_DESTINATION} backup-fileserver:/Backup --exclude=/cloud/** --max-size 100G --update --verbose --transfers 30 --checkers 8 --contimeout 60s --timeout 300s --retries 3 --low-level-retries 10 --stats 1s		
+MsgType "Envio concluído." 1
+
 exit 0
