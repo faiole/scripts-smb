@@ -60,8 +60,4 @@ case "$ACTION" in
 		MsgType "Unknown action! ($ACTION)" 1
 esac
 
-MsgType "Enviando os arquivos diários para a nuvem..." 1
-/usr/bin/rclone copy ${BACKUP_DESTINATION} backup-fileserver:/Backup --exclude=/cloud/** --max-size 100G --update --verbose --transfers 30 --checkers 8 --contimeout 60s --timeout 300s --retries 3 --low-level-retries 10 --stats 1s		
-MsgType "Envio concluído." 1
-
 exit 0

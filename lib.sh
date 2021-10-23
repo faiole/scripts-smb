@@ -88,10 +88,12 @@ function FullBackup {
 	local timestamp=`date +%Y%m%d-%H%M%S`
 	local directory="$destination/$timestamp-full"
 	local archive="$filename.tar.gz"
+	MsgType "Salvando novo master no arquivo de configuração..."
+        SetConfigField $config BACKUP_PARENT "$timestamp-full"
 	MsgType "Executando backup completo..."										
 	PerformBackup "$source" "$directory" "$archive" "$snapshot"	
-	MsgType "Salvando novo master no arquivo de configuração..."
-	SetConfigField $config BACKUP_PARENT "$timestamp-full"
+	#MsgType "Salvando novo master no arquivo de configuração..."
+	#SetConfigField $config BACKUP_PARENT "$timestamp-full"
 }
 
 function IncrementalBackup {
@@ -133,7 +135,7 @@ function PerformBackup {
 	res=$?
 	if [ ! $res -eq 0 ];
 	then
-		MsgType "Compactação falhou! ($res)" 1
+		MsgType "Tar falhou! ($res)" 1
 	else
 		backupDuration=$(($SECONDS - $backupStart))
 		backupMin=$(($backupDuration / 60))
